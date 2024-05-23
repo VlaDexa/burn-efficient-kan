@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install dependencies
-      run: sudo apt install libatlas-base-dev
+      run: sudo apt install libatlas-base-dev mesa-vulkan-drivers
     - name: Build
       run: cargo build --verbose
     - name: Run tests

@@ -1,0 +1,42 @@
+[package]
+name = "burn-efficient-kan"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Vladislav Grechannik <vgechannik@gmail.com>"]
+
+[features]
+default = []
+
+netlib = ["ndarray-linalg/netlib"]
+openblas = ["ndarray-linalg/openblas"]
+intel-mkl = ["ndarray-linalg/intel-mkl"]
+
+netlib-static = ["ndarray-linalg/netlib-static"]
+netlib-system = ["ndarray-linalg/netlib-system"]
+
+openblas-static = ["ndarray-linalg/openblas-static"]
+openblas-system = ["ndarray-linalg/openblas-system"]
+
+intel-mkl-static = ["ndarray-linalg/intel-mkl-static"]
+intel-mkl-system = ["ndarray-linalg/intel-mkl-system"]
+
+[dependencies]
+log = "0.4.21"
+ndarray = "0.15.6"
+
+[dependencies.ndarray-linalg]
+version = "0.16.0"
+
+[dependencies.burn]
+version = "0.13.2"
+
+[dev-dependencies.burn]
+features = ["wgpu", "train", "vision", "tui"]
+
+[dev-dependencies.ndarray-linalg]
+features = ["netlib-system"]
+
+[[example]]
+name = "mnist"
+path = "examples/mnist/main.rs"

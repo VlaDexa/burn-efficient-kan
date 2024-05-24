@@ -4,6 +4,16 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 authors = ["Vladislav Grechannik <vgechannik@gmail.com>"]
+description = "An efficient pure-Rust implementation of Kolmogorov-Arnold Network (KAN)."
+repository = "https://github.com/VlaDexa/burn-efficient-kan"
+keywords = [
+	"machine-learning",
+	"deep-learning",
+	"neural-networks",
+	"kan",
+	"burn",
+]
+categories = ["science"]
 
 [features]
 default = []

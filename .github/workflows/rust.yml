@@ -16,6 +16,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Cache dependencies
+      id: cache-cargo
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-cargo
+      with:
+        path: ~/.cargo
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
     - name: Install dependencies
       run: sudo apt install libatlas-base-dev mesa-vulkan-drivers
     - name: Build

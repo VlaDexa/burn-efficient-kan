@@ -24,12 +24,8 @@ intel-mkl-system = ["ndarray-linalg/intel-mkl-system"]
 [dependencies]
 log = "0.4.21"
 ndarray = "0.15.6"
-
-[dependencies.ndarray-linalg]
-version = "0.16.0"
-
-[dependencies.burn]
-version = "0.13.2"
+ndarray-linalg = "0.16.0"
+burn = "0.13.2"
 
 [dev-dependencies.burn]
 features = ["wgpu", "train", "vision", "tui"]

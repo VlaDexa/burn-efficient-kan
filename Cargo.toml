@@ -32,16 +32,16 @@ intel-mkl-static = ["ndarray-linalg/intel-mkl-static"]
 intel-mkl-system = ["ndarray-linalg/intel-mkl-system"]
 
 [dependencies]
-ndarray = "0.15.6"
-ndarray-linalg = "0.16.0"
-burn = "0.13.2"
+ndarray = "0.15"
+ndarray-linalg = "0.16"
+burn = "0.13"
 
 [dev-dependencies.burn]
-version = "*"
+version = "0.13"
 features = ["wgpu", "train", "vision", "tui"]
 
 [dev-dependencies.ndarray-linalg]
-version = "*"
+version = "0.16"
 features = ["netlib-system"]
 
 [[example]]

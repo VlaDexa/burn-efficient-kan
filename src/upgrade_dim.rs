@@ -7,11 +7,6 @@ pub trait UpgradeDim<B: Backend, const N: usize> {
 impl<B: Backend> UpgradeDim<B, 3> for Tensor<B, 2> {
     fn upgrade_dim(self, to_shape: impl Into<Shape<3>>) -> Tensor<B, 3> {
         let self_shape = to_shape.into();
-        assert!(
-            self_shape.dims[0..=1] != self.shape().dims,
-            "{}",
-            std::backtrace::Backtrace::force_capture()
-        );
         self.unsqueeze::<3>()
     }
 }

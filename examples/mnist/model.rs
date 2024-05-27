@@ -31,8 +31,8 @@ impl<B: Backend> Kan<B> {
     pub fn forward(&self, input: Tensor<B, 3>) -> Tensor<B, 2> {
         let [batch_size, height, width] = input.dims();
         let x = input.reshape([batch_size, height * width]);
-        let x = self.kan.forward(x);
-        x
+        
+        self.kan.forward(x)
     }
 
     pub fn forward_classification(&self, item: MnistBatch<B>) -> ClassificationOutput<B> {

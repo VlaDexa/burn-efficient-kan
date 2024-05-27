@@ -5,6 +5,7 @@ use crate::data::MnistBatcher;
 use burn::{
     backend::{Autodiff, Wgpu},
     data::{dataloader::DataLoaderBuilder, dataset::vision::MnistDataset},
+    lr_scheduler::noam::NoamLrSchedulerConfig,
     optim::AdamWConfig,
     prelude::*,
     record::{CompactRecorder, NoStdTrainingRecorder},
@@ -33,6 +34,7 @@ pub struct KanTrainingConfig {
     pub num_workers: usize,
     pub optimizer: AdamWConfig,
     pub kan_options: KanOptions,
+    pub lr_scheduler: NoamLrSchedulerConfig,
 }
 
 fn create_artifact_dir(artifact_dir: &str) {
@@ -48,7 +50,11 @@ where
     create_artifact_dir(ARTIFACT_DIR);
     // Config
     let config_optimizer = burn::optim::AdamWConfig::new().with_weight_decay(1e-4);
-    let config = KanTrainingConfig::new(config_optimizer, KanOptions::new([24 * 22 * 22, 64, 10]));
+    let config = KanTrainingConfig::new(
+        config_optimizer,
+        KanOptions::new([784, 64, 10]),
+        NoamLrSchedulerConfig::new(1e-4),
+    );
     B::seed(config.seed);
 
     // Data
@@ -91,7 +97,7 @@ where
         .build(
             model::Kan::new(&config.kan_options, &device),
             config.optimizer.init(),
-            1e-4,
+            config.lr_scheduler.init(),
         );
 
     let model_trained = learner.fit(dataloader_train, dataloader_test);

@@ -3,7 +3,6 @@ mod down_dim;
 mod kaiming;
 mod least_squares;
 mod linear;
-mod upgrade_dim;
 use burn::{
     config::Config,
     module::Module,

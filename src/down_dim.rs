@@ -1,11 +1,6 @@
 use burn::tensor::{backend::Backend, Bool, Float, Tensor, TensorKind};
 
-use crate::upgrade_dim::UpgradeDim;
-
-pub trait DownDimensionOps<B: Backend, const N1: usize, const N2: usize, T: TensorKind<B> = Float>
-where
-    Tensor<B, N2, T>: UpgradeDim<B, N1>,
-{
+pub trait DownDimensionOps<B: Backend, const N1: usize, const N2: usize, T: TensorKind<B> = Float> {
     fn greater_equal_down(self, other: Tensor<B, N2, T>) -> Tensor<B, N1, Bool>;
     fn lower_down(self, other: Tensor<B, N2, T>) -> Tensor<B, N1, Bool>;
     fn sub_down(self, other: Tensor<B, N2, T>) -> Tensor<B, N1, T>;
@@ -14,24 +9,36 @@ where
 
 impl<B: Backend> DownDimensionOps<B, 3, 2> for Tensor<B, 3> {
     fn greater_equal_down(self, other: Tensor<B, 2>) -> Tensor<B, 3, Bool> {
-        let upgrade = other.upgrade_dim(self.shape());
+        let upgrade = other.unsqueeze::<3>();
         self.greater_equal(upgrade)
     }
 
     fn lower_down(self, other: Tensor<B, 2>) -> Tensor<B, 3, Bool> {
-        let upgrade = other.upgrade_dim(self.shape());
+        let upgrade = other.unsqueeze::<3>();
         self.lower(upgrade)
     }
 
     fn sub_down(self, other: Tensor<B, 2>) -> Self {
-        let upgrade = other.upgrade_dim(self.shape());
+        let upgrade = other.unsqueeze::<3>();
         self.sub(upgrade)
     }
 
     fn div_down(self, other: Tensor<B, 2>) -> Self {
-        let upgrade = other.upgrade_dim(self.shape());
+        let upgrade = other.unsqueeze::<3>();
         self.div(upgrade)
     }
+}
+
+#[test]
+fn auto_burn_broadcast() {
+    use burn::backend::Wgpu;
+    type B = Wgpu;
+    let device = <B as Backend>::Device::default();
+    let a = Tensor::<B, 2>::ones([1, 2], &device);
+    let b = Tensor::<B, 2>::ones([3, 2], &device);
+    let c = a + b;
+    assert_eq!(c.dims(), [3, 2]);
+    assert!(c.equal_elem(2).all().into_scalar());
 }
 
 #[test]
@@ -54,5 +61,5 @@ fn greater_equal_down_test() {
         res
     });
     let test = Tensor::<B, 3, Bool>::from_bool(test_res.into(), &device);
-    c.to_data().assert_approx_eq(&test.to_data(), 1);
+    assert!(c.equal(test).all().into_scalar());
 }

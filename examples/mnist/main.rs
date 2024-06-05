@@ -5,7 +5,7 @@ use crate::data::MnistBatcher;
 use burn::{
     backend::{Autodiff, Wgpu},
     data::{dataloader::DataLoaderBuilder, dataset::vision::MnistDataset},
-    lr_scheduler::noam::NoamLrSchedulerConfig,
+    lr_scheduler::{noam::NoamLrSchedulerConfig, LrScheduler},
     optim::AdamWConfig,
     prelude::*,
     record::{CompactRecorder, NoStdTrainingRecorder},
@@ -17,6 +17,7 @@ use burn::{
         },
         LearnerBuilder, MetricEarlyStoppingStrategy, StoppingCondition,
     },
+    LearningRate,
 };
 use burn_efficient_kan::KanOptions;
 
@@ -34,7 +35,7 @@ pub struct KanTrainingConfig {
     pub num_workers: usize,
     pub optimizer: AdamWConfig,
     pub kan_options: KanOptions,
-    pub lr_scheduler: NoamLrSchedulerConfig,
+    pub lr_scheduler: f64,
 }
 
 fn create_artifact_dir(artifact_dir: &str) {
@@ -50,11 +51,7 @@ where
     create_artifact_dir(ARTIFACT_DIR);
     // Config
     let config_optimizer = burn::optim::AdamWConfig::new().with_weight_decay(1e-4);
-    let config = KanTrainingConfig::new(
-        config_optimizer,
-        KanOptions::new([784, 64, 10]),
-        NoamLrSchedulerConfig::new(1e-4),
-    );
+    let config = KanTrainingConfig::new(config_optimizer, KanOptions::new([784, 64, 10]), 1e-4);
     B::seed(config.seed);
 
     // Data
@@ -97,7 +94,7 @@ where
         .build(
             model::Kan::new(&config.kan_options, &device),
             config.optimizer.init(),
-            config.lr_scheduler.init(),
+            config.lr_scheduler,
         );
 
     let model_trained = learner.fit(dataloader_train, dataloader_test);

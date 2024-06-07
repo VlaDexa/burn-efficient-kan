@@ -5,7 +5,6 @@ use crate::data::MnistBatcher;
 use burn::{
     backend::{Autodiff, Wgpu},
     data::{dataloader::DataLoaderBuilder, dataset::vision::MnistDataset},
-    lr_scheduler::{noam::NoamLrSchedulerConfig, LrScheduler},
     optim::AdamWConfig,
     prelude::*,
     record::{CompactRecorder, NoStdTrainingRecorder},
@@ -17,7 +16,6 @@ use burn::{
         },
         LearnerBuilder, MetricEarlyStoppingStrategy, StoppingCondition,
     },
-    LearningRate,
 };
 use burn_efficient_kan::KanOptions;
 

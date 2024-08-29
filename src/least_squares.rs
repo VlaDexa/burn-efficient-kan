@@ -1,4 +1,4 @@
-use burn::tensor::{backend::Backend, Data, Shape, Tensor};
+use burn::tensor::{backend::Backend, Shape, Tensor, TensorData};
 use ndarray_linalg::LeastSquaresResult;
 
 pub trait LeastSquares {
@@ -13,21 +13,26 @@ where
     B::FloatElem: ndarray_linalg::Scalar + ndarray_linalg::Lapack,
 {
     type B = Self;
-    type Out = ndarray_linalg::error::Result<Data<B::FloatElem, 2>>;
+    type Out = ndarray_linalg::error::Result<TensorData>;
 
     fn burn_least_squares(self, b: Self::B) -> Self::Out {
         use ndarray_linalg::LeastSquaresSvd;
         // Convert to ndarray
-        let a =
-            ndarray::Array::from_shape_vec((self.dims()[0], self.dims()[1]), self.to_data().value)
-                .unwrap();
-        let b =
-            ndarray::Array::from_shape_vec((b.dims()[0], b.dims()[1]), b.to_data().value).unwrap();
+        let a: ndarray::Array2<B::FloatElem> = ndarray::Array::from_shape_vec(
+            (self.dims()[0], self.dims()[1]),
+            self.to_data().to_vec::<B::FloatElem>().unwrap(),
+        )
+        .unwrap();
+        let b: ndarray::Array2<B::FloatElem> = ndarray::Array::from_shape_vec(
+            (b.dims()[0], b.dims()[1]),
+            b.to_data().to_vec::<B::FloatElem>().unwrap(),
+        )
+        .unwrap();
         // Perform least squares
         a.least_squares(&b)
             .map(|LeastSquaresResult { solution, .. }| {
                 let shape = solution.raw_dim();
-                Data::new(solution.into_raw_vec(), [shape[0], shape[1]].into())
+                TensorData::new(solution.into_raw_vec(), [shape[0], shape[1]])
             })
     }
 }
@@ -37,7 +42,7 @@ where
     B::FloatElem: ndarray_linalg::Scalar + ndarray_linalg::Lapack,
 {
     type B = Self;
-    type Out = ndarray_linalg::error::Result<Data<B::FloatElem, 3>>;
+    type Out = ndarray_linalg::error::Result<TensorData>;
 
     fn burn_least_squares(self, b: Self::B) -> Self::Out {
         let b_dims = b.dims();
@@ -48,30 +53,27 @@ where
             b_dims[0] == self_dims[0] || is_singleton(&b),
             "The size of tensor a ({}) must match the size of tensor b ({}) at non-singleton dimension 0", b_dims[0], self_dims[0]
         );
-        let mut result = Vec::with_capacity(b_dims[0] * b_dims[2] * self_dims[2]);
+        let mut result: Vec<B::FloatElem> =
+            Vec::with_capacity(b_dims[0] * b_dims[2] * self_dims[2]);
         match b_dims[0] {
             1 => {
                 let b = b.squeeze::<2>(0);
                 for a in self.iter_dim(0) {
                     let a = a.squeeze::<2>(0);
-                    match a.burn_least_squares(b.clone()) {
-                        Ok(solution) => result.extend(solution.value),
-                        Err(e) => return Err(e),
-                    }
+                    let solution = a.burn_least_squares(b.clone())?;
+                    result.extend(solution.as_slice::<B::FloatElem>().unwrap());
                 }
             }
             _ => {
                 for (a, b) in self.iter_dim(0).zip(b.iter_dim(0)) {
                     let a = a.squeeze::<2>(0);
                     let b = b.squeeze::<2>(0);
-                    match a.burn_least_squares(b.clone()) {
-                        Ok(solution) => result.extend(solution.value),
-                        Err(e) => return Err(e),
-                    }
+                    let solution = a.burn_least_squares(b.clone())?;
+                    result.extend(solution.as_slice::<B::FloatElem>().unwrap());
                 }
             }
         };
-        Ok(Data::new(
+        Ok(TensorData::new(
             result,
             Shape::from([in_features, grid_spline_sum, out_features]),
         ))
@@ -110,12 +112,12 @@ fn is_singleton_test() {
 
 #[test]
 fn ndarray_torch_compat() {
-    use ndarray::array;
+    use ndarray::{array, Array2};
     use ndarray_linalg::LeastSquaresSvd;
     // Create a 2x6
-    let a = array![[1., 2., 3., 4., 5., 6.], [7., 8., 9., 10., 11., 12.]];
+    let a: Array2<_> = array![[1., 2., 3., 4., 5., 6.], [7., 8., 9., 10., 11., 12.]];
     // Create a 2x3
-    let b = array![[1., 2., 3.], [4., 5., 6.]];
+    let b: Array2<_> = array![[1., 2., 3.], [4., 5., 6.]];
     // Perform least squares
     let res = a.least_squares(&b);
     assert!(res.is_ok());

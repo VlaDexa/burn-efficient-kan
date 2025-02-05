@@ -32,7 +32,7 @@ where
         a.least_squares(&b)
             .map(|LeastSquaresResult { solution, .. }| {
                 let shape = solution.raw_dim();
-                TensorData::new(solution.into_raw_vec(), [shape[0], shape[1]])
+                TensorData::new(solution.into_raw_vec_and_offset().0, [shape[0], shape[1]])
             })
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "burn-efficient-kan"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "MIT"
 authors = ["Vladislav Grechannik <vgechannik@gmail.com>"]
@@ -32,16 +32,16 @@ intel-mkl-static = ["ndarray-linalg/intel-mkl-static"]
 intel-mkl-system = ["ndarray-linalg/intel-mkl-system"]
 
 [dependencies]
-ndarray = "0.15"
-ndarray-linalg = "0.16"
-burn = "0.14"
+ndarray = "0.16"
+ndarray-linalg = "0.17"
+burn = "0.16"
 
 [dev-dependencies.burn]
-version = "0.14"
+version = "0.16"
 features = ["wgpu", "train", "vision", "tui"]
 
 [dev-dependencies.ndarray-linalg]
-version = "0.16"
+version = "0.17"
 features = ["netlib-system"]
 
 [[example]]

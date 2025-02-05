@@ -29,7 +29,9 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
     - name: Install dependencies
-      run: sudo apt install libatlas-base-dev mesa-vulkan-drivers
+      run: |
+        sudo apt update
+        sudo apt install libatlas-base-dev mesa-vulkan-drivers
     - name: Build
       run: cargo build --verbose
     - name: Run tests
